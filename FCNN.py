@@ -38,4 +38,5 @@ class FCFFNN(object):
         return 1/(1+np.exp(-(np.clip(Z,-500,500))))
     def tanh(Z):
         return np.tanh(Z)
-    
+    def ReLU(Z):
+        return np.maximum(0 , Z)
