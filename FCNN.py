@@ -49,3 +49,9 @@ class FCFFNN(object):
         return (Z>0).astype(float)
     def dsame(Z):
         return np.ones_like(Z)
+
+    def softmax(Z):
+        shift_Z = Z - np.max(Z , axis=0 , keepdims=True)
+        return np.exp(shift_Z)/np.sum(np.exp(shift_Z) , axis=0 , keepdims=True)
+    def same(Z):
+        return Z
