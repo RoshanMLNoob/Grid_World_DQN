@@ -55,3 +55,6 @@ class FCFFNN(object):
         return np.exp(shift_Z)/np.sum(np.exp(shift_Z) , axis=0 , keepdims=True)
     def same(Z):
         return Z
+
+    def lr_constant(t , k=0.01):
+        return k
