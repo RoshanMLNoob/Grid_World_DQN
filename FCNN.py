@@ -24,4 +24,13 @@ class FCFFNN(object):
             self.weights.append( self.weight_initialization(self.layers[i+1] , self.layers[i] , activation) )
             self.biases.append( np.zeros((self.layers[i+1] , 1)) )
 
-            
+    def Loss_CE(self , AL , y , Catagorial=True):
+        AL = np.clip(AL,1e-12,1-1e-12)
+        if Catagorial:
+            return -np.sum(y*np.log(AL))/AL.shape[1]
+        else:
+            return -np.sum(y*np.log(AL) + (1-y)np.log(1-AL))/AL.shape[1]
+
+    def Loss_sq(self , AL , y):
+        return np.mean((AL-y)**2)
+    
