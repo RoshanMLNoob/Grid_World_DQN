@@ -126,3 +126,21 @@ class FCFFNN(object):
             dZ = (2/m)*(AL-Y)*f_prime(self.Zs[-1])
 
         self.dw , self.db = [] , []
+
+        def back_propagate():
+            nonlocal dZ
+            df = deriv_map.get(self.activation_f , FCFFNN.dsame)
+
+            for i in range(len(self.weights)-1 , -1 , -1):
+                A_i = self.activations[-1]
+                dW = (1/m)*dZ@A_i.T
+                dB = (1/m)*np.sum(dZ , axis=1 , keepdims=True)
+                self.db.append(dB) , self.dw.append(dW)
+
+                if i > 0:
+                    dZ = (self.weights[i].T@dZ)*df(self.Zs[i-1])
+                else:
+                    self.dZ_1 = dZ
+            self.dw = self.dw[::-1]
+            self.db = self.db[::-1]
+        back_propagate()
