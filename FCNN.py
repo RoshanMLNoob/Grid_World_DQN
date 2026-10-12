@@ -40,3 +40,12 @@ class FCFFNN(object):
         return np.tanh(Z)
     def ReLU(Z):
         return np.maximum(0 , Z)
+
+    def dSig(Z):
+        return FCFFNN.sigmoid(Z)*(1-FCFFNN.sigmoid(Z))
+    def dtanh(Z):
+        return 1-(np.tanh(Z)**2)
+    def dReLU(Z):
+        return (Z>0).astype(float)
+    def dsame(Z):
+        return np.ones_like(Z)
