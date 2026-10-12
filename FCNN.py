@@ -31,7 +31,7 @@ class FCFFNN(object):
         if Catagorial:
             return -np.sum(y*np.log(AL))/AL.shape[1]
         else:
-            return -np.sum(y*np.log(AL) + (1-y)np.log(1-AL))/AL.shape[1]
+            return -np.sum(y*np.log(AL) + (1-y)*np.log(1-AL))/AL.shape[1]
 
     def Loss_sq(self , AL , y):
         return np.mean((AL-y)**2)
