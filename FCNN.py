@@ -58,3 +58,71 @@ class FCFFNN(object):
 
     def lr_constant(t , k=0.01):
         return k
+
+    def forward_pass(self , X,Y=None , activation="sigmoid" , lla="softmax" , Sloss="cross entropy"):
+        if activation.lower() == "sigmoid":
+            self.activation_f = FCFFNN.sigmoid
+        elif activation.lower() == "tanh":
+            self.activation_f = FCFFNN.tanh
+        else:
+            self.activation_f = FCFFNN.ReLU
+
+        if lla.lower() == "softmax":
+            self.activation_llf = FCFFNN.softmax
+        elif lla.lower() == "linear":
+            self.activation_llf = FCFFNN.same
+        else:
+            self.activation_llf = self.activation_f
+
+        if Sloss.lower() == "cross entropy":
+            self._loss = self.Loss_CE
+        elif Sloss.lower() in ["squared","mse","mean squared error"]:
+            self._loss = self.Loss_sq
+
+        self.activations , self.Zs = [X] , []
+        for i in range(len(self.weights)):
+            A = self.activations[-1]
+            Z = self.weights[i]@A + self.biases[i]
+            self.Zs.append(Z)
+
+            if i != len(self.weights)-1:
+                self.activations.append(self.activation_f(Z))
+            else:
+                self.activations.append(self.activation_llf(Z))
+
+        if Y is not None:
+            return self._loss(self.activations[-1] , Y)
+        return self.activations[-1]
+
+    def backward_pass(self, X, Y, loss="cross entropy", activation="sigmoid", lla="softmax", forwardpass=False):
+        self.loss_type_str = loss.lower()
+
+        if forwardpass is False:
+            self.forward_pass(X , Y , activation=activation , lla=lla)
+
+        f , lf = self.activation_f , self.activation_llf
+
+        if loss.lower() == "cross entropy":
+            self.loss = self.Loss_CE
+        elif loss.lower() in ["squared","mse","mean squared error"]:
+            self.loss = self.Loss_sq
+
+        AL = self.activations[-1]
+        m = X.shape[1]
+
+        deriv_map = {
+            FCFFNN.sigmoid:FCFFNN.dSig,
+            FCFFNN.tanh:FCFFNN.dtanh,
+            FCFFNN.ReLU:FCFFNN.dReLU,
+            FCFFNN.same:FCFFNN.dsame
+        }
+
+        if self.loss_type_str == "cross entropy" and lla.lower() == "softmax":
+            dZ = AL - Y
+        elif self.loss_type_str in ["squared","mse","mean squared error"] and lla.lower() in ["linear","same"]:
+            dZ = (2/m)*(AL-Y)
+        else:
+            f_prime = deriv_map.get(lf , FCFFNN.dsame)
+            dZ = (2/m)*(AL-Y)*f_prime(self.Zs[-1])
+
+        self.dw , self.db = [] , []
