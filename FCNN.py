@@ -195,3 +195,33 @@ class FCFFNN(object):
         self.weights = Data["W"]
         self.biases = Data["B"]
         self.layers = Data["L"]
+
+    def Test_NN(self , Test_ds=None , X=None , Y=None , limit=None , activation="sigmoid" , lla="softmax" , Sloss="cross entropy"):
+
+        if (X is None) and (Y is None):
+            X_all = np.column_stack([item[0] for item in Test_ds])
+            Y_all = np.column_stack([item[1] for item in Test_ds])
+        elif Test_ds is None:
+            X_all = X
+            Y_all = Y
+
+        if Sloss.lower() == "cross entropy":
+            self.loss = self.Loss_CE
+        elif Sloss.lower() in ["squared", "mse", "mean squared error"]:
+            self.loss = self.Loss_sq
+
+        self.test_loss = []
+        if limit is not None:
+            X_all = X_all[: , limit]
+            Y_all = Y_all[: , limit]
+
+        for i in range(X_all.shape[1]):
+            x = X_all[: , [i]]
+            y = Y_all[: , [i]]
+            self.forward_pass(x , activation=activation , lla=lla , Sloss=Sloss)
+            self.test_loss.append(self.loss(self.activations[-1] , y))
+            if i%1000 == 0:
+                print(f"At the {i} element the loss is {self.test_loss[-1]}")
+        return self.test_loss
+
+    
