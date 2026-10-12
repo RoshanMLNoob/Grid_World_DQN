@@ -181,3 +181,17 @@ class FCFFNN(object):
                     print(f"At iteration {t} and epoch {mu} we have loss {self.losses_over_t[-1]}")
 
         return round(time.time()-Start , 3)
+
+    def save_model(self , file):
+
+        Data = {"W":self.weights , "B":self.biases , "L":self.layers}
+        with open(file , "wb") as f:
+            pickle.dump(Data , f)
+
+    def load_model(self , file):
+        
+        with open(file , "rb") as f:
+            Data = pickle.load(f)
+        self.weights = Data["W"]
+        self.biases = Data["B"]
+        self.layers = Data["L"]
