@@ -3,6 +3,7 @@ import pickle
 import json
 import os
 import sys
+import time
 
 class FCFFNN(object):
 
@@ -144,3 +145,39 @@ class FCFFNN(object):
             self.dw = self.dw[::-1]
             self.db = self.db[::-1]
         back_propagate()
+
+    def Train_NN(self , Dataset=None , X1=None, Y1=None, k=1, iterations=1, epoch=1, lr=None, lam=0, loss="cross entropy", activation="sigmoid", lla="softmax", interval=100):
+        Start = time.time()
+        if lr is None:
+            lr = FCFFNN.lr_constant
+
+        if (X1 is None) and (Y1 is None) and (Dataset is not None):
+            X_all = np.column_stack([item[0] for item in Dataset])
+            Y_all = np.column_stack([item[1] for item in Dataset])
+        elif (X1 is not None) and (Y1 is not None):
+            X_all = X1
+            Y_all = Y1
+        else:
+            print("WARNING : You must enter (X and Y) or the Datast, is none is entered the training will fail")
+            return None
+
+        num_samples = X_all.shape[1]
+        self.losses_over_t = []
+
+        for t in range(1,iterations+1):
+
+            indices = np.random.choice(num_samples , size=k , replace=False)
+            X = X_all[: , indices]
+            Y = Y_all[: , indices]
+
+            for mu in range(1,epoch+1):
+                self.backward_pass(X,Y,loss=loss,activation=activation,lla=lla)
+                for i in range(len(self.weights)):
+                    self.weights[i] = (1-(lr(t)*lam))*self.weights[i] - (lr(t)*self.dw[i])
+                    self.biases[i] = self.biases[i] - (lr(t)*self.db)
+                self.losses_over_t.append(self.loss(self.activations[-1],Y))
+
+                if t%interval==0:
+                    print(f"At iteration {t} and epoch {mu} we have loss {self.losses_over_t[-1]}")
+
+        return round(time.time()-Start , 3)
