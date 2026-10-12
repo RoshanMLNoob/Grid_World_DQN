@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import time
+import matplotlib.pyplot as plt
 
 class FCFFNN(object):
 
@@ -148,6 +149,7 @@ class FCFFNN(object):
 
     def Train_NN(self , Dataset=None , X1=None, Y1=None, k=1, iterations=1, epoch=1, lr=None, lam=0, loss="cross entropy", activation="sigmoid", lla="softmax", interval=100):
         Start = time.time()
+
         if lr is None:
             lr = FCFFNN.lr_constant
 
@@ -172,6 +174,7 @@ class FCFFNN(object):
 
             for mu in range(1,epoch+1):
                 self.backward_pass(X,Y,loss=loss,activation=activation,lla=lla)
+
                 for i in range(len(self.weights)):
                     self.weights[i] = (1-(lr(t)*lam))*self.weights[i] - (lr(t)*self.dw[i])
                     self.biases[i] = self.biases[i] - (lr(t)*self.db)
@@ -192,6 +195,7 @@ class FCFFNN(object):
         
         with open(file , "rb") as f:
             Data = pickle.load(f)
+            
         self.weights = Data["W"]
         self.biases = Data["B"]
         self.layers = Data["L"]
@@ -224,4 +228,23 @@ class FCFFNN(object):
                 print(f"At the {i} element the loss is {self.test_loss[-1]}")
         return self.test_loss
 
-    
+    def graph(self , show=True , test_loss=False , train_loss=False):
+        if train_loss:
+            Y = self.losses_over_t
+            plt.plot(Y , color="blue" , label="Train Loss")
+
+        if test_loss:
+            y = self.test_loss
+            plt.plot(y , color="red" , label="Test Loss")
+
+        plt.ylabel("Loss")
+        plt.xlabel("Each iteration ove each Batch")
+        plt.grid(True)
+        plt.legend()
+
+        if show is True:
+            plt.show()
+
+if __name__ == "__main__":
+
+    pass
