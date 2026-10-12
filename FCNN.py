@@ -33,4 +33,9 @@ class FCFFNN(object):
 
     def Loss_sq(self , AL , y):
         return np.mean((AL-y)**2)
+
+    def sigmoid(Z):
+        return 1/(1+np.exp(-(np.clip(Z,-500,500))))
+    def tanh(Z):
+        return np.tanh(Z)
     
